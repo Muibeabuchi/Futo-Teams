@@ -5,6 +5,8 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/providers/convex-provider";
 
 import "./globals.css";
+import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -23,7 +25,8 @@ export default function RootLayout({
   return (
     <ConvexAuthNextjsServerProvider>
       <html lang="en">
-        <body className={inter.className}>
+        <body className={cn(inter.className, "antialiased min-h-screen")}>
+          <Toaster />
           <ConvexClientProvider>{children}</ConvexClientProvider>
         </body>
       </html>
