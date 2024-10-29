@@ -13,7 +13,7 @@ export const useGenerateUploadUrl = () => {
   // ? Decouple this mutation form the workspace feature
   const generateUploadUrl = useMutation(api.workspaces.generateUploadUrl);
 
-  const handleSendImage = async (image: File) => {
+  const handleSendImage = async (image?: File) => {
     if (!image) return;
     if (image.size > 1024 * 1024)
       throw new Error("File must be less than 1 mb");
@@ -36,5 +36,5 @@ export const useGenerateUploadUrl = () => {
     return storageId as Id<"_storage">;
   };
 
-  return handleSendImage;
+  return { handleSendImage };
 };
