@@ -24,17 +24,26 @@ const authenticatedUserMutation = customMutation(mutation, {
     const userId = await getAuthUserId(ctx);
     if (userId === null) throw new ConvexError("Unauthorized");
 
-    return { ctx: {}, args: {} };
+    return { ctx: { userId }, args: {} };
+  },
+});
+
+export const generateUploadUrl = authenticatedUserMutation({
+  args: {},
+  async handler(ctx) {
+    return await ctx.storage.generateUploadUrl();
   },
 });
 
 export const create = authenticatedUserMutation({
   args: {
     workspaceName: v.string(),
+    workspaceImageId: v.optional(v.id("_storage")),
   },
   async handler(ctx, args) {
     const workspaceId = await ctx.db.insert("workspaces", {
       workspaceName: args.workspaceName,
+      workspaceCreator: ctx.userId,
     });
     return workspaceId;
   },
