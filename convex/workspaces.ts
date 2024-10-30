@@ -44,6 +44,7 @@ export const create = authenticatedUserMutation({
     const workspaceId = await ctx.db.insert("workspaces", {
       workspaceName: args.workspaceName,
       workspaceCreator: ctx.userId,
+      workspaceAvatar: args.workspaceImageId,
     });
     return workspaceId;
   },

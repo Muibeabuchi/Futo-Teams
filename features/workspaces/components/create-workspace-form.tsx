@@ -37,7 +37,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
   const form = useForm<z.infer<typeof createWorkspaceSchema>>({
     defaultValues: {
       name: "",
-      // image: ,
+      image: undefined,
     },
     resolver: zodResolver(createWorkspaceSchema),
   });
@@ -61,7 +61,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
+    console.log(file);
     if (file) form.setValue("image", file);
   };
 
@@ -103,7 +103,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                     <div className="flex flex-col gap-y-2">
                       <div className="flex items-center gap-x-5">
                         {field.value ? (
-                          <div className="size-72px overflow-hidden rounded-md relative">
+                          <div className="size-[72px] overflow-hidden rounded-md relative">
                             <Image
                               src={
                                 field.value instanceof File
@@ -132,12 +132,13 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                             type="file"
                             accept=".jpg, .png, .jpeg, .svg"
                             ref={inputRef}
-                            disabled={isCreatingWorkspace}
+                            // disabled={isCreatingWorkspace}
                             onChange={handleImageChange}
+                            // {...field}
                           />
                           <Button
                             type="button"
-                            disabled={isCreatingWorkspace}
+                            disabled={form.formState.isSubmitting}
                             variant="territory"
                             size="xs"
                             className="w-fit mt-2"
@@ -159,11 +160,15 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                 size="lg"
                 variant="secondary"
                 onClick={onCancel}
-                disabled={isCreatingWorkspace}
+                disabled={form.formState.isSubmitting}
               >
                 Cancel
               </Button>
-              <Button disabled={isCreatingWorkspace} type="submit" size="lg">
+              <Button
+                disabled={form.formState.isSubmitting}
+                type="submit"
+                size="lg"
+              >
                 Create Workspace
               </Button>
             </div>
