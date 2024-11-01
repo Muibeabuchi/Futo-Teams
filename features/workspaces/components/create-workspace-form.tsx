@@ -5,6 +5,7 @@ import Image from "next/image";
 import { z } from "zod";
 import { ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DottedSeparator } from "@/components/doted-separator";
@@ -43,20 +44,23 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
   });
 
   const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
-    const storageId = await handleSendImage(values.image);
-
-    createWorkspace(
-      {
-        workspaceName: values.name,
-        workspaceImageId: storageId,
-      },
-      {
-        onSuccess() {
-          form.reset();
-          // TODO: Redirect the user to the new workspace
+    try {
+      const storageId = await handleSendImage(values.image);
+      createWorkspace(
+        {
+          workspaceName: values.name,
+          workspaceImageId: storageId,
         },
-      }
-    );
+        {
+          onSuccess() {
+            form.reset();
+            // TODO: Redirect the user to the new workspace
+          },
+        }
+      );
+    } catch (error) {
+      toast.error(`There was an error while uploading the image  ${error}`);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
