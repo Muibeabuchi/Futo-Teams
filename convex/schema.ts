@@ -8,6 +8,7 @@ const schema = defineSchema({
     workspaceName: v.string(),
     workspaceCreator: v.id("users"),
     workspaceAvatar: v.optional(v.id("_storage")),
+    workspaceInviteCode: v.string(),
   }).index("by_workspace_creator", ["workspaceCreator"]),
   members: defineTable({
     userId: v.id("users"),
