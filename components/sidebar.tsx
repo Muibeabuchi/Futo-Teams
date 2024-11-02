@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DottedSeparator } from "./doted-separator";
 import Navigation from "./navigation";
+import WorkspaceSwitcher from "./workspace-switcher";
 
 function Sidebar() {
   return (
@@ -12,6 +13,8 @@ function Sidebar() {
           <p>FUTO-TEAM</p>
         </div>
       </Link>
+      <DottedSeparator className="my-4" />
+      <WorkspaceSwitcher />
       <DottedSeparator className="my-4" />
       <Navigation />
     </aside>
