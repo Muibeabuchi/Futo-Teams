@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { RiAddCircleFill } from "react-icons/ri";
 
 import {
@@ -11,12 +12,21 @@ import {
 } from "@/components/ui/select";
 import { useGetUserWorkspaces } from "@/features/workspaces/api/use-get-workspaces";
 import { WorkspaceAvatar } from "@/features/workspaces/components/workspace-avatar";
+import { Id } from "@/convex/_generated/dataModel";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
 
 type Props = {};
 
 export default function WorkspaceSwitcher({}: Props) {
+  const router = useRouter();
+  const workspaceId = useWorkspaceId();
   const { data: workspaces, error, isPending } = useGetUserWorkspaces();
+  const { open, isOpen, setIsOpen } = useCreateWorkspaceModal();
 
+  const onSelect = (workspaceId: Id<"workspaces">) => {
+    router.push(`/workspaces/${workspaceId}`);
+  };
   // if (isPending) return;
 
   console.log(workspaces);
@@ -28,13 +38,16 @@ export default function WorkspaceSwitcher({}: Props) {
     <div className="flex flex-col gap-y-2">
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase text-neutral-500">Workspaces</p>
-        <RiAddCircleFill className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition" />
+        <RiAddCircleFill
+          onClick={open}
+          className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
+        />
       </div>
 
-      {isPending && null}
+      {isPending && <p>Loading...</p>}
 
       {workspaces && workspaces.length > 0 ? (
-        <Select>
+        <Select value={workspaceId} onValueChange={onSelect}>
           <SelectTrigger className="w-full p-1 font-medium bg-neutral-200">
             <SelectValue placeholder="No workspace selected" />
           </SelectTrigger>

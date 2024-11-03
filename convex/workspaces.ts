@@ -55,12 +55,6 @@ export const getUserWorkspaces = query({
     if (userId === null) return null;
     const user = await ctx.db.get(userId);
     if (!user) return null;
-    // const workspaces = await ctx.db
-    //   .query("workspaces")
-    //   .withIndex("by_workspace_creator", (q) =>
-    //     q.eq("workspaceCreator", user._id)
-    //   )
-    //   .collect();
 
     const members = await ctx.db
       .query("members")
@@ -74,6 +68,7 @@ export const getUserWorkspaces = query({
         return workspace;
       })
     );
+    console.log("workspaces", workspaces);
 
     const workspacesWithAvatar = await Promise.all(
       workspaces.map(async (workspace) => {
