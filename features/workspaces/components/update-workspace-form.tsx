@@ -43,6 +43,7 @@ export const UpdateWorkspaceForm = ({
   initialValues,
 }: updateWorkspaceFormProps) => {
   const router = useRouter();
+  const workspaceImageRef = useRef<HTMLImageElement>(null);
   const workspaceId = useWorkspaceId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: updateWorkspace, isPending: isUpdatingWorkspace } =
@@ -64,6 +65,8 @@ export const UpdateWorkspaceForm = ({
       const storageId = await handleSendImage(
         typeof values.image !== "string" ? values.image : undefined
       );
+      if (workspaceImageRef.current)
+        URL.revokeObjectURL(workspaceImageRef.current.src);
       updateWorkspace(
         {
           workspaceName: values.name,
@@ -174,16 +177,39 @@ export const UpdateWorkspaceForm = ({
                             onChange={handleImageChange}
                             // {...field}
                           />
-                          <Button
-                            type="button"
-                            disabled={form.formState.isSubmitting}
-                            variant="territory"
-                            size="xs"
-                            className="w-fit mt-2"
-                            onClick={() => inputRef.current?.click?.()}
-                          >
-                            Upload Image
-                          </Button>
+                          {field?.value ? (
+                            <Button
+                              type="button"
+                              disabled={form.formState.isSubmitting}
+                              variant="destructive"
+                              size="xs"
+                              className="w-fit mt-2"
+                              onClick={() => {
+                                field.onChange(null);
+                                if (inputRef.current) {
+                                  inputRef.current.value = "";
+                                }
+                                if (workspaceImageRef.current) {
+                                  URL.revokeObjectURL(
+                                    workspaceImageRef.current.src
+                                  );
+                                }
+                              }}
+                            >
+                              Remove Image
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              disabled={form.formState.isSubmitting}
+                              variant="territory"
+                              size="xs"
+                              className="w-fit mt-2"
+                              onClick={() => inputRef.current?.click?.()}
+                            >
+                              Upload Image
+                            </Button>
+                          )}{" "}
                         </div>
                       </div>
                     </div>

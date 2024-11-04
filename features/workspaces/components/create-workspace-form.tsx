@@ -34,6 +34,7 @@ interface createWorkspaceFormProps {
 
 export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
   const router = useRouter();
+  const workspaceImageRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: createWorkspace, isPending: isCreatingWorkspace } =
     useCreateWorkspace();
@@ -49,6 +50,8 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
   const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
     try {
       const storageId = await handleSendImage(values.image);
+      if (workspaceImageRef.current)
+        URL.revokeObjectURL(workspaceImageRef.current.src);
       createWorkspace(
         {
           workspaceName: values.name,
@@ -117,6 +120,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                                   ? URL.createObjectURL(field.value)
                                   : field.value
                               }
+                              ref={workspaceImageRef}
                               alt="logo"
                               fill
                               className="object-cover"
@@ -143,16 +147,39 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                             onChange={handleImageChange}
                             // {...field}
                           />
-                          <Button
-                            type="button"
-                            disabled={form.formState.isSubmitting}
-                            variant="territory"
-                            size="xs"
-                            className="w-fit mt-2"
-                            onClick={() => inputRef.current?.click?.()}
-                          >
-                            Upload Image
-                          </Button>
+                          {field?.value ? (
+                            <Button
+                              type="button"
+                              disabled={form.formState.isSubmitting}
+                              variant="destructive"
+                              size="xs"
+                              className="w-fit mt-2"
+                              onClick={() => {
+                                field.onChange(null);
+                                if (inputRef.current) {
+                                  inputRef.current.value = "";
+                                }
+                                if (workspaceImageRef.current) {
+                                  URL.revokeObjectURL(
+                                    workspaceImageRef.current.src
+                                  );
+                                }
+                              }}
+                            >
+                              Remove Image
+                            </Button>
+                          ) : (
+                            <Button
+                              type="button"
+                              disabled={form.formState.isSubmitting}
+                              variant="territory"
+                              size="xs"
+                              className="w-fit mt-2"
+                              onClick={() => inputRef.current?.click?.()}
+                            >
+                              Upload Image
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </div>
