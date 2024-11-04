@@ -123,3 +123,13 @@ export const update = authorizedWorkspaceMutation({
     return args.workspaceId;
   },
 });
+
+export const remove = authorizedWorkspaceMutation({
+  args: {},
+  async handler(ctx, args) {
+    // TODO: remove the members, tasks and projects as well
+
+    await ctx.db.delete(args.workspaceId);
+    return args.workspaceId;
+  },
+});
