@@ -14,7 +14,9 @@ const schema = defineSchema({
     userId: v.id("users"),
     workspaceId: v.id("workspaces"),
     role: v.union(v.literal("admin"), v.literal("member")),
-  }).index("by_userId", ["userId"]),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_by_workspaceId", ["userId", "workspaceId"]),
 
   // Your other tables...
 });
