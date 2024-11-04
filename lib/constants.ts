@@ -9,25 +9,25 @@ import {
 
 export const Routes = [
   {
-    label: "Home",
+    label: "Home" as const,
     href: "",
     filledIcon: GoHomeFill,
     Icon: GoHome,
   },
   {
-    label: "My Tasks",
+    label: "My Tasks" as const,
     href: "/tasks",
     Icon: GoCheckCircle,
     filledIcon: GoCheckCircleFill,
   },
   {
-    label: "Settings",
+    label: "Settings" as const,
     href: "/settings",
     filledIcon: SettingsIcon,
     Icon: SettingsIcon,
   },
   {
-    label: "Users",
+    label: "Users" as const,
     href: "/users",
     filledIcon: UsersIcon,
     Icon: UsersIcon,
