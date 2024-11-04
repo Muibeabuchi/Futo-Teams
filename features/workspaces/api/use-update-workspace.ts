@@ -3,7 +3,7 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const useMutateWorkspace = () =>
+export const useUpdateWorkspace = () =>
   useMutation({
     mutationFn: useConvexMutation(api.workspaces.update),
     onSuccess: () => {

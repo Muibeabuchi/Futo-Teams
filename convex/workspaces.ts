@@ -1,79 +1,28 @@
-import {
-  customQuery,
-  customCtx,
-  customMutation,
-} from "convex-helpers/server/customFunctions";
 import { ConvexError, v } from "convex/values";
 
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { generateInviteCode } from "../lib/utils";
+import {
+  authenticatedUserMutation,
+  authenticatedUserQuery,
+  authorizedWorkspaceMutation,
+  authorizedWorkspaceQuery,
+} from "./middleware";
 
-import { mutation, query } from "./_generated/server";
-
-// !MIDDLEWARES
-const authenticatedUserQuery = customQuery(
-  query,
-  customCtx(async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (userId === null) throw new ConvexError("Unauthorized");
-    const user = await ctx.db.get(userId);
-    if (!user) throw new ConvexError("Unauthorized");
-    return { ctx: { user }, args: {} };
-  })
-);
-
-const authorizedWorkspaceMutation = customMutation(mutation, {
-  args: {
-    workspaceId: v.id("workspaces"),
-  },
-  async input(ctx, args) {
-    const userId = await getAuthUserId(ctx);
-
-    if (userId === null) throw new ConvexError("Unauthorized");
-    const user = await ctx.db.get(userId);
-    if (!user) throw new ConvexError("Unauthorized");
-
-    // grab the workspace
-    // const workspace = await ctx.db.get(args.workspaceId);
-    // if (!workspace) throw new ConvexError("Workspace does not exist!");
-
-    // TODO: check if the user is also an member and admin
-
-    // check if the user is a member of the workspace
-    const member = await ctx.db
-      .query("members")
-      .withIndex("by_userId_by_workspaceId", (q) =>
-        q.eq("userId", user._id).eq("workspaceId", args.workspaceId)
-      )
-      .unique();
-    if (!member) throw new ConvexError("Unauthorized");
-
-    // check if the member is an admin
-    const isAdmin = member.role === "admin";
-
-    // check if the user is the creator
-    if (!isAdmin)
-      throw new ConvexError(
-        "You do not have permission to change this workspace"
-      );
-
-    return { ctx: { member }, args };
+// ! UPLOAD FILE GENERATION
+export const generateUploadUrl = authenticatedUserMutation({
+  args: {},
+  async handler(ctx) {
+    return await ctx.storage.generateUploadUrl();
   },
 });
 
-export const getUserWorkspaces = query({
+// ! DATABASE QUERIES
+export const getUserWorkspaces = authenticatedUserQuery({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (userId === null) return null;
-    const user = await ctx.db.get(userId);
-    if (!user) return null;
-
     const members = await ctx.db
       .query("members")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.user._id))
       .collect();
 
     const workspaces = await Promise.all(
@@ -83,7 +32,6 @@ export const getUserWorkspaces = query({
         return workspace;
       })
     );
-    console.log("workspaces", workspaces);
 
     const workspacesWithAvatar = await Promise.all(
       workspaces.map(async (workspace) => {
@@ -101,25 +49,40 @@ export const getUserWorkspaces = query({
   },
 });
 
-const authenticatedUserMutation = customMutation(mutation, {
-  args: {},
-  input: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new ConvexError("Unauthorized");
+export const getWorkspaceById = authorizedWorkspaceQuery({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  async handler(ctx, args) {
+    // ? Does the user need to be a member to query this data?
+    // Is this user a member of this workspace
 
-    return { ctx: { userId }, args: {} };
+    const workspace = await ctx.db.get(ctx.member.workspaceId);
+    if (!workspace) return null;
+    if (!workspace.workspaceAvatar)
+      return {
+        ...workspace,
+        workspaceAvatar: "",
+      };
+    // if (workspace.workspaceAvatar) {
+    const workspaceAvatar = await ctx.storage.getUrl(workspace.workspaceAvatar);
+    if (!workspaceAvatar) return { ...workspace, workspaceAvatar: "" };
+    // if (workspaceAvatar) {
+    return {
+      ...workspace,
+      workspaceAvatar: workspaceAvatar,
+      // };
+      // } else {
+      //   return {
+      //     ...workspace,
+      //     workspaceAvatar: "",
+      //   };
+      // }
+    };
   },
 });
 
-// ! UPLOAD FILE GENERATION
-export const generateUploadUrl = authenticatedUserMutation({
-  args: {},
-  async handler(ctx) {
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
-// ! DATABASE QUERIES & MUTATIONS
+// ! DATABASE MUTATIONS
 export const create = authenticatedUserMutation({
   args: {
     workspaceName: v.string(),
@@ -147,7 +110,7 @@ export const create = authenticatedUserMutation({
 export const update = authorizedWorkspaceMutation({
   args: {
     workspaceName: v.optional(v.string()),
-    workspaceAvatar: v.id("_storage"),
+    workspaceImageId: v.optional(v.id("_storage")),
   },
   async handler(ctx, args) {
     //? we have access to the workspace document in the ctx argument
@@ -155,7 +118,8 @@ export const update = authorizedWorkspaceMutation({
     // update the workspace
     await ctx.db.patch(args.workspaceId, {
       workspaceName: args.workspaceName,
-      workspaceAvatar: args.workspaceAvatar,
+      workspaceAvatar: args.workspaceImageId,
     });
+    return args.workspaceId;
   },
 });
