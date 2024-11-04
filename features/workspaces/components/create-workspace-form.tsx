@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 import { createWorkspaceSchema } from "../schema";
 import { useCreateWorkspace } from "../api/use-create-workspace";
@@ -168,6 +169,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                 variant="secondary"
                 onClick={onCancel}
                 disabled={form.formState.isSubmitting}
+                className={cn(!!onCancel ? "visible" : "invisible")}
               >
                 Cancel
               </Button>
