@@ -129,6 +129,21 @@ export const remove = authorizedWorkspaceMutation({
   async handler(ctx, args) {
     // TODO: remove the members, tasks and projects as well
 
+    // grab all members of the workspace
+    const members = await ctx.db
+      .query("members")
+      .withIndex("by_workspaceId", (q) =>
+        q.eq("workspaceId", ctx.member.workspaceId)
+      )
+      .collect();
+
+    // delete all members of the workspace
+    await Promise.all(
+      members.map(async (member) => {
+        await ctx.db.delete(member._id);
+      })
+    );
+
     await ctx.db.delete(args.workspaceId);
     return args.workspaceId;
   },

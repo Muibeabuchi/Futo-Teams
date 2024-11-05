@@ -16,7 +16,8 @@ const schema = defineSchema({
     role: v.union(v.literal("admin"), v.literal("member")),
   })
     .index("by_userId", ["userId"])
-    .index("by_userId_by_workspaceId", ["userId", "workspaceId"]),
+    .index("by_userId_by_workspaceId", ["userId", "workspaceId"])
+    .index("by_workspaceId", ["workspaceId"]),
 
   // Your other tables...
 });
