@@ -31,6 +31,7 @@ import { useGenerateUploadUrl } from "../api/use-generate-workspace-image-upload
 import { useWorkspaceId } from "../hooks/use-workspace-id";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useRemoveWorkspace } from "../api/use-remove-workspace";
+import { useResetWorkspaceLink } from "../api/use-reset-workspace-link";
 
 interface updateWorkspaceFormProps {
   onCancel?: () => void;
@@ -50,7 +51,8 @@ export const UpdateWorkspaceForm = ({
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { mutate: updateWorkspace, isPending: isUpdatingWorkspace } =
     useUpdateWorkspace();
-
+  const { mutate: resetWorkspaceLink, isPending: resettingWorkspaceLink } =
+    useResetWorkspaceLink();
   const { mutate: removeWorkspace, isPending: removingWorkspace } =
     useRemoveWorkspace();
   const { handleSendImage } = useGenerateUploadUrl();
@@ -59,6 +61,12 @@ export const UpdateWorkspaceForm = ({
     description: "This action cannot be undone",
     variant: "destructive",
   });
+  const [confirmResetWorkspaceLink, ResetWorkspaceLinkConfirmationModal] =
+    useConfirm({
+      title: "Reset Workspace Link",
+      description: "This will reset your workspace link for all members ",
+      variant: "destructive",
+    });
   const form = useForm<z.infer<typeof updateWorkspaceSchema>>({
     defaultValues: {
       ...initialValues,
@@ -119,9 +127,25 @@ export const UpdateWorkspaceForm = ({
     );
   };
 
+  const handleResetWorkspaceLink = async () => {
+    const ok = await confirmResetWorkspaceLink();
+    if (!ok) return;
+
+    resetWorkspaceLink(
+      { workspaceId },
+      {
+        onSuccess() {
+          // redirect to the workspace homepage after successfully resetting workspace link
+          router.push(`/workspaces/${initialValues._id}`);
+        },
+      }
+    );
+  };
+
   return (
     <div className="flex flex-col gap-y-4 ">
       <ConfirmationModal />
+      <ResetWorkspaceLinkConfirmationModal />
 
       <Card className="w-full h-full border-none shadow-none">
         <CardHeader className="flex flex-row items-center justify-between gap-x-4 space-y-0 p-7">
@@ -270,6 +294,30 @@ export const UpdateWorkspaceForm = ({
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      <Card className="w-full h-full border-none shadow-none">
+        <CardContent className="p-7">
+          <div className="flex flex-col">
+            <h3 className="font-bold">Invite Members</h3>
+            <p className="text-sm text-muted-foreground">
+              Use the invite link to add members to your workspace
+            </p>
+
+            {/* TODO:  ADD INPUT AND BUTTON FOR COPYING THE INVITE-LINK*/}
+            <Input disabled name="workspace-link" />
+            <Button
+              type="button"
+              size="sm"
+              className="mt-6 w-fit ml-auto"
+              variant="destructive"
+              disabled={resettingWorkspaceLink || isUpdatingWorkspace}
+              onClick={handleResetWorkspaceLink}
+            >
+              Reset invite link
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

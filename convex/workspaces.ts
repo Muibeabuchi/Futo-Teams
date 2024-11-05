@@ -148,3 +148,25 @@ export const remove = authorizedWorkspaceMutation({
     return args.workspaceId;
   },
 });
+
+export const resetInviteLink = authorizedWorkspaceMutation({
+  args: {},
+  async handler(ctx, args) {
+    const workspace = await ctx.db.get(args.workspaceId);
+    function getCode() {
+      const code = generateInviteCode(10);
+      if (code === workspace?.workspaceInviteCode) {
+        getCode();
+      }
+      return code;
+    }
+
+    const workspaceInviteCode = getCode();
+
+    await ctx.db.patch(args.workspaceId, {
+      workspaceInviteCode,
+    });
+
+    return workspaceInviteCode;
+  },
+});
