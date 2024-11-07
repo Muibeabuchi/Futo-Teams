@@ -30,7 +30,7 @@ export const getUserWorkspaces = authenticatedUserQuery({
         const workspace = await ctx.db.get(member.workspaceId);
         if (!workspace) throw new ConvexError("Error fetching workspace");
         return workspace;
-      })
+      }),
     );
 
     const workspacesWithAvatar = await Promise.all(
@@ -42,10 +42,24 @@ export const getUserWorkspaces = authenticatedUserQuery({
           ...workspace,
           workspaceAvatar: avatarUrl,
         };
-      })
+      }),
     );
 
     return workspacesWithAvatar;
+  },
+});
+
+export const getWorkspaceInfo = authenticatedUserQuery({
+  args: {
+    workspaceId: v.id("workspaces"),
+  },
+  async handler(ctx, args) {
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) return null;
+
+    return {
+      workspaceName: workspace.workspaceName,
+    };
   },
 });
 
@@ -133,7 +147,7 @@ export const remove = authorizedWorkspaceMutation({
     const members = await ctx.db
       .query("members")
       .withIndex("by_workspaceId", (q) =>
-        q.eq("workspaceId", ctx.member.workspaceId)
+        q.eq("workspaceId", ctx.member.workspaceId),
       )
       .collect();
 
@@ -141,7 +155,7 @@ export const remove = authorizedWorkspaceMutation({
     await Promise.all(
       members.map(async (member) => {
         await ctx.db.delete(member._id);
-      })
+      }),
     );
 
     await ctx.db.delete(args.workspaceId);
@@ -168,5 +182,40 @@ export const resetInviteLink = authorizedWorkspaceMutation({
     });
 
     return workspaceInviteCode;
+  },
+});
+
+export const join = authenticatedUserMutation({
+  args: {
+    workspaceId: v.id("workspaces"),
+    workspaceInviteCode: v.string(),
+  },
+  async handler(ctx, args) {
+    //   grab the workspace
+    const workspace = await ctx.db.get(args.workspaceId);
+    if (!workspace) throw new ConvexError("Failed to join");
+
+    //   check if the workspace code matches
+    if (workspace.workspaceInviteCode !== args.workspaceInviteCode)
+      throw new ConvexError("Invalid code");
+
+    // check if the user is already a member of the workspace
+    const member = await ctx.db
+      .query("members")
+      .withIndex("by_userId_by_workspaceId", (q) =>
+        q.eq("userId", ctx.userId).eq("workspaceId", args.workspaceId),
+      )
+      .unique();
+
+    if (!member) throw new ConvexError("Already a member in the workspace");
+
+    // add the user as a member to the workspace
+    await ctx.db.insert("members", {
+      role: "member",
+      workspaceId: args.workspaceId,
+      userId: ctx.userId,
+    });
+
+    return workspace;
   },
 });
