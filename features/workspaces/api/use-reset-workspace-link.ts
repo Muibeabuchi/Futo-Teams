@@ -9,5 +9,9 @@ export function useResetWorkspaceLink() {
     onSuccess() {
       toast.success("Workspace invite-link has been reset successfully");
     },
+    onError(){
+
+      toast.error("Failed to reset invite-link");
+    }
   });
 }

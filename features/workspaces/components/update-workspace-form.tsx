@@ -4,10 +4,11 @@ import { useRef } from "react";
 import Image from "next/image";
 import { RedirectType, useRouter } from "next/navigation";
 import { z } from "zod";
-import { ArrowLeftIcon, ImageIcon } from "lucide-react";
+import { ArrowLeftIcon, CopyIcon, ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { Doc } from "@/convex/_generated/dataModel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DottedSeparator } from "@/components/doted-separator";
@@ -79,7 +80,7 @@ export const UpdateWorkspaceForm = ({
   const onSubmit = async (values: z.infer<typeof updateWorkspaceSchema>) => {
     try {
       const storageId = await handleSendImage(
-        typeof values.image !== "string" ? values.image : undefined
+        typeof values.image !== "string" ? values.image : undefined,
       );
       if (workspaceImageRef.current)
         URL.revokeObjectURL(workspaceImageRef.current.src);
@@ -97,7 +98,7 @@ export const UpdateWorkspaceForm = ({
           onSettled() {
             router.refresh();
           },
-        }
+        },
       );
     } catch (error) {
       toast.error(`There was an error while uploading the image  ${error}`);
@@ -123,7 +124,7 @@ export const UpdateWorkspaceForm = ({
           // redirect the user to the home page
           router.replace("/");
         },
-      }
+      },
     );
   };
 
@@ -135,11 +136,18 @@ export const UpdateWorkspaceForm = ({
       { workspaceId },
       {
         onSuccess() {
-          // redirect to the workspace homepage after successfully resetting workspace link
-          router.push(`/workspaces/${initialValues._id}`);
+          router.refresh(); // redirect to the workspace homepage after successfully resetting workspace link
+          // router.push(`/workspaces/${initialValues._id}`);
         },
-      }
+      },
     );
+  };
+
+  const [, setValue] = useCopyToClipboard();
+  const resetLink = `${window.location.origin}/workspaces/${initialValues._id}/join/${initialValues.workspaceInviteCode}`;
+  const copyResetLinkToClipboard = async () => {
+    await setValue(resetLink);
+    toast.success("Reset link copied");
   };
 
   return (
@@ -246,7 +254,7 @@ export const UpdateWorkspaceForm = ({
                                   }
                                   if (workspaceImageRef.current) {
                                     URL.revokeObjectURL(
-                                      workspaceImageRef.current.src
+                                      workspaceImageRef.current.src,
                                     );
                                   }
                                 }}
@@ -306,7 +314,19 @@ export const UpdateWorkspaceForm = ({
             </p>
 
             {/* TODO:  ADD INPUT AND BUTTON FOR COPYING THE INVITE-LINK*/}
-            <Input disabled name="workspace-link" />
+            <div className="mt-4">
+              <div className="flex items-center gap-x-2">
+                <Input disabled value={resetLink} name="workspace-link" />
+                <Button
+                  onClick={copyResetLinkToClipboard}
+                  variant="secondary"
+                  className={"size-12"}
+                >
+                  <CopyIcon className={"size-5"} />
+                </Button>
+              </div>
+            </div>
+            <DottedSeparator className={"py-7"} />
             <Button
               type="button"
               size="sm"
@@ -329,6 +349,7 @@ export const UpdateWorkspaceForm = ({
               Deleting a workspace is irreversible and will remove all
               associated data.
             </p>
+            <DottedSeparator className={"py-7"} />
             <Button
               type="button"
               size="sm"

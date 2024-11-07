@@ -1,6 +1,6 @@
 "use client";
 
-import { useMedia } from "react-use";
+import { useMediaQuery } from "@uidotdev/usehooks";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "./ui/drawer";
@@ -17,7 +17,10 @@ export const ResponsiveModal = ({
   onOpenChange,
   open,
 }: ResponsiveModalProps) => {
-  const isDesktop = useMedia("(min-width: 1024px)", true);
+  // const isDesktop = useMedia("(min-width: 1024px)", true);
+  const isDesktop = useMediaQuery(
+      "only screen and (min-width : 120px)"
+  );
 
   if (isDesktop) {
     return (
