@@ -33,7 +33,7 @@ export const getUserWorkspaces = authenticatedUserQuery({
       }),
     );
 
-    const workspacesWithAvatar = await Promise.all(
+    return await Promise.all(
       workspaces.map(async (workspace) => {
         if (!workspace.workspaceAvatar)
           return { ...workspace, workspaceAvatar: "" };
@@ -44,8 +44,6 @@ export const getUserWorkspaces = authenticatedUserQuery({
         };
       }),
     );
-
-    return workspacesWithAvatar;
   },
 });
 
@@ -67,7 +65,7 @@ export const getWorkspaceById = authorizedWorkspaceQuery({
   args: {
     workspaceId: v.id("workspaces"),
   },
-  async handler(ctx, args) {
+  async handler(ctx) {
     // ? Does the user need to be a member to query this data?
     // Is this user a member of this workspace
 
@@ -208,6 +206,8 @@ export const join = authenticatedUserMutation({
       .unique();
 
     if (!member) throw new ConvexError("Already a member in the workspace");
+    if (member.userId === ctx.userId)
+      throw new ConvexError("Already a member of the workspace");
 
     // add the user as a member to the workspace
     await ctx.db.insert("members", {

@@ -28,7 +28,7 @@ export const Routes = [
   },
   {
     label: "Users" as const,
-    href: "/users",
+    href: "/members",
     filledIcon: UsersIcon,
     Icon: UsersIcon,
   },

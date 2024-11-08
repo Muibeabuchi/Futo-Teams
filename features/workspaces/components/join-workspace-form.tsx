@@ -58,12 +58,12 @@ export const JoinWorkspaceForm = ({
       <CardContent className={"p-7"}>
         <div
           className={
-            "flex flex-col lg:flex-row gap-2 items-center lg:justify-between"
+            "flex flex-col md:flex-row gap-2 items-center md:justify-between"
           }
         >
           <Button
             variant={"secondary"}
-            className={"w-full lg:w-fit"}
+            className={"w-full md:w-fit"}
             disabled={isJoiningWorkspace}
             asChild
           >
@@ -71,7 +71,7 @@ export const JoinWorkspaceForm = ({
           </Button>
           <Button
             onClick={handleJoinWorkspace}
-            className={"w-full lg:w-fit"}
+            className={"w-full md:w-fit"}
             disabled={isJoiningWorkspace}
           >
             Join

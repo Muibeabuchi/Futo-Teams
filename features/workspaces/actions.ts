@@ -10,7 +10,7 @@ type getWorkspaceInfoProps = {
 
 export async function getWorkspaceInfo({ workspaceId }: getWorkspaceInfoProps) {
   return await fetchQuery(
-    api.workspaces.getWorkspaceById,
+    api.workspaces.getWorkspaceInfo,
     { workspaceId },
     {
       token: convexAuthNextjsToken(),
