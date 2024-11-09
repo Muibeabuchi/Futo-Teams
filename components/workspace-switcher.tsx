@@ -46,7 +46,9 @@ export default function WorkspaceSwitcher({}: Props) {
       </div>
 
       {isPending && (
-        <Loader className="size-4 animate-spin text-muted-foreground" />
+        <div className="flex w-full justify-center items-center">
+          <Loader className="size-4 animate-spin text-muted-foreground" />
+        </div>
       )}
 
       {workspaces && workspaces.length > 0 ? (

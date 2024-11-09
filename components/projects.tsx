@@ -7,13 +7,16 @@ import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useCreateProjectModal } from "@/features/projects/hooks/use-create-project-modal";
+import { ProjectAvatar } from "@/features/projects/components/project-avatar";
+import { Loader } from "lucide-react";
 
 interface projectsProps {}
 
 const Projects = (props: projectsProps) => {
   const pathname = usePathname();
   const workspaceId = useWorkspaceId();
-
+  const { open } = useCreateProjectModal();
   const { data: projects, isPending: isLoadingProjects } =
     useGetWorkspaceProjects(workspaceId);
   return (
@@ -21,10 +24,17 @@ const Projects = (props: projectsProps) => {
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase text-neutral-500">Projects</p>
         <RiAddCircleFill
-          // onClick={open}
+          onClick={open}
           className="size-5 text-neutral-500 cursor-pointer hover:opacity-75 transition"
         />
       </div>
+
+      {isLoadingProjects && (
+        <div className="flex w-full justify-center items-center">
+          <Loader className="size-4 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
       {projects && projects.length > 0
         ? projects.map((project) => {
             const href = `/workspaces/${project.workspaceId}/projects/${project._id}`;
@@ -38,8 +48,13 @@ const Projects = (props: projectsProps) => {
                     isActive &&
                       "bg-white shadow-sm hover:opacity-100 text-primary"
                   )}
-                ></div>
-                <span className="truncate">{project.projectName}</span>
+                >
+                  <ProjectAvatar
+                    image={project.projectImage}
+                    name={project.projectName}
+                  />
+                  <span className="truncate">{project.projectName}</span>
+                </div>
               </Link>
             );
           })

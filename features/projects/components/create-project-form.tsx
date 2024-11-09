@@ -24,43 +24,47 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
-import { createWorkspaceSchema } from "../schema";
-import { useCreateWorkspace } from "../api/use-create-workspace";
-import { useGenerateUploadUrl } from "../../../hooks/use-generate-image-upload-url";
+import { createProjectSchema } from "../schema";
+import { useCreateProject } from "../api/use-create-project";
 
-interface createWorkspaceFormProps {
+import { useGenerateUploadUrl } from "@/hooks/use-generate-image-upload-url";
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
+
+interface CreateProjectFormProps {
   onCancel?: () => void;
 }
 
-export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
+export const CreateProjectForm = ({ onCancel }: CreateProjectFormProps) => {
   const router = useRouter();
+  const workspaceId = useWorkspaceId();
   const workspaceImageRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const { mutate: createWorkspace, isPending: isCreatingWorkspace } =
-    useCreateWorkspace();
+  const { mutate: createProject, isPending: isCreatingProject } =
+    useCreateProject();
   const { handleSendImage } = useGenerateUploadUrl();
-  const form = useForm<z.infer<typeof createWorkspaceSchema>>({
+  const form = useForm<z.infer<typeof createProjectSchema>>({
     defaultValues: {
       name: "",
       image: undefined,
     },
-    resolver: zodResolver(createWorkspaceSchema),
+    resolver: zodResolver(createProjectSchema.omit({ workspaceId: true })),
   });
 
-  const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
+  const onSubmit = async (values: z.infer<typeof createProjectSchema>) => {
     try {
       const storageId = await handleSendImage(values.image);
       if (workspaceImageRef.current)
         URL.revokeObjectURL(workspaceImageRef.current.src);
-      createWorkspace(
+      createProject(
         {
-          workspaceName: values.name,
-          workspaceImageId: storageId,
+          projectName: values.name,
+          projectImage: storageId,
+          workspaceId,
         },
         {
-          onSuccess(data) {
+          onSuccess(projectId) {
             form.reset();
-            router.push(`/workspaces/${data}`);
+            router.push(`/workspaces/${workspaceId}/projects/${projectId}`);
           },
         }
       );
@@ -78,9 +82,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
   return (
     <Card className="w-full h-full border-none shadow-none">
       <CardHeader className="flex p-7">
-        <CardTitle className="text-lg fontbold">
-          Create a new Workspace
-        </CardTitle>
+        <CardTitle className="text-lg fontbold">Create a new Project</CardTitle>
       </CardHeader>
       <div className="px-7">
         <DottedSeparator />
@@ -95,7 +97,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                 render={({ field }) => {
                   return (
                     <FormItem>
-                      <FormLabel>Workspace Name</FormLabel>
+                      <FormLabel>Project Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter Workspace Name" {...field} />
                       </FormControl>
@@ -134,7 +136,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                           </Avatar>
                         )}
                         <div className="flex flex-col">
-                          <p className="test-sm">Workspace Icon</p>
+                          <p className="test-sm">Project Icon</p>
                           <p className="test-sm text-muted-foreground">
                             JPG, PNG, SVG or JPEG, max1 mb
                           </p>
@@ -143,7 +145,7 @@ export const CreateWorkspaceForm = ({ onCancel }: createWorkspaceFormProps) => {
                             type="file"
                             accept=".jpg, .png, .jpeg, .svg"
                             ref={inputRef}
-                            // disabled={isCreatingWorkspace}
+                            // disabled={isCreatingProject}
                             onChange={handleImageChange}
                             // {...field}
                           />

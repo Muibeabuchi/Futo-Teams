@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 
 import { updateWorkspaceSchema } from "../schema";
 import { useUpdateWorkspace } from "../api/use-update-workspace";
-import { useGenerateUploadUrl } from "../api/use-generate-workspace-image-upload-url";
+import { useGenerateUploadUrl } from "../../../hooks/use-generate-image-upload-url";
 import { useWorkspaceId } from "../hooks/use-workspace-id";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useRemoveWorkspace } from "../api/use-remove-workspace";
@@ -80,7 +80,7 @@ export const UpdateWorkspaceForm = ({
   const onSubmit = async (values: z.infer<typeof updateWorkspaceSchema>) => {
     try {
       const storageId = await handleSendImage(
-        typeof values.image !== "string" ? values.image : undefined,
+        typeof values.image !== "string" ? values.image : undefined
       );
       if (workspaceImageRef.current)
         URL.revokeObjectURL(workspaceImageRef.current.src);
@@ -98,7 +98,7 @@ export const UpdateWorkspaceForm = ({
           onSettled() {
             router.refresh();
           },
-        },
+        }
       );
     } catch (error) {
       toast.error(`There was an error while uploading the image  ${error}`);
@@ -124,7 +124,7 @@ export const UpdateWorkspaceForm = ({
           // redirect the user to the home page
           router.replace("/");
         },
-      },
+      }
     );
   };
 
@@ -139,7 +139,7 @@ export const UpdateWorkspaceForm = ({
           router.refresh(); // redirect to the workspace homepage after successfully resetting workspace link
           // router.push(`/workspaces/${initialValues._id}`);
         },
-      },
+      }
     );
   };
 
@@ -254,7 +254,7 @@ export const UpdateWorkspaceForm = ({
                                   }
                                   if (workspaceImageRef.current) {
                                     URL.revokeObjectURL(
-                                      workspaceImageRef.current.src,
+                                      workspaceImageRef.current.src
                                     );
                                   }
                                 }}
