@@ -18,7 +18,13 @@ const schema = defineSchema({
     .index("by_userId", ["userId"])
     .index("by_userId_by_workspaceId", ["userId", "workspaceId"])
     .index("by_workspaceId", ["workspaceId"]),
-
+  projects: defineTable({
+    projectImage: v.optional(v.id("_storage")),
+    projectName: v.string(),
+    workspaceId: v.id("workspaces"),
+  })
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_projectName", ["projectName"]),
   // Your other tables...
 });
 
