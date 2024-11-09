@@ -15,6 +15,7 @@ import { WorkspaceAvatar } from "@/features/workspaces/components/workspace-avat
 import { Id } from "@/convex/_generated/dataModel";
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id";
 import { useCreateWorkspaceModal } from "@/features/workspaces/hooks/use-create-workspace-modal";
+import { Loader } from "lucide-react";
 
 type Props = {};
 
@@ -29,7 +30,7 @@ export default function WorkspaceSwitcher({}: Props) {
   };
   // if (isPending) return;
 
-  console.log(workspaces);
+  // console.log(workspaces);
   // if (!workspaces) return null;
   // {
   //   workspaces === null && null;
@@ -44,7 +45,9 @@ export default function WorkspaceSwitcher({}: Props) {
         />
       </div>
 
-      {isPending && <p>Loading...</p>}
+      {isPending && (
+        <Loader className="size-4 animate-spin text-muted-foreground" />
+      )}
 
       {workspaces && workspaces.length > 0 ? (
         <Select value={workspaceId} onValueChange={onSelect}>
