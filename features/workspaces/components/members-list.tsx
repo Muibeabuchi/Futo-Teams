@@ -15,6 +15,7 @@ import {useDeleteMember} from "@/features/members/api/use-delete-member";
 import {Id} from "@/convex/_generated/dataModel";
 import {useRouter} from "next/navigation";
 import {useUpdateMember} from "@/features/members/api/use-update-member";
+import {useConfirm} from "@/hooks/use-confirm";
 
 export const MembersList = () => {
   const router= useRouter()
@@ -28,6 +29,12 @@ export const MembersList = () => {
   const {mutate:removeMember,isPending:isRemovingMember} = useDeleteMember();
   const {mutate:updateMember,isPending:isUpdatingMember} = useUpdateMember();
 
+  const [confirmRemoveMember, RemoveMemberConfirmationModal] =
+      useConfirm({
+        title: "Remove this member",
+        description: "This will permanently remove this member from this workspace ",
+        variant: "destructive",
+      });
   
   const handleUpdateMember=(memberId:Id<"members">,role:"admin"|"member")=>{
     updateMember({memberId,memberRole:role},{
@@ -37,7 +44,10 @@ export const MembersList = () => {
     })
   }
   
-  const handleRemoveMember=(memberId:Id<"members">)=>{
+  const handleRemoveMember=async(memberId:Id<"members">)=>{
+    const ok =await confirmRemoveMember()
+
+    if(!ok) return
     removeMember({
       memberId
     },{
@@ -61,6 +71,8 @@ export const MembersList = () => {
   }
 
   return (
+      <>
+        <RemoveMemberConfirmationModal />
     <Card className={"w-full h-full border-none shadow-none"}>
       <CardHeader className=" flex flex-row  gap-x-4 space-y-0 p-7 items-center ">
         <Button size={"sm"} variant={"secondary"} asChild>
@@ -117,5 +129,6 @@ export const MembersList = () => {
         ))}
       </CardContent>
     </Card>
+      </>
   );
 };
