@@ -42,6 +42,23 @@ export const get = authorizedWorkspaceQuery({
   },
 });
 
+export const getById = authorizedWorkspaceQuery({
+  args: { projectId: v.id("projects") },
+  async handler(ctx, args) {
+    // load and return  the project
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project) throw new ConvexError("Project not found");
+
+    return {
+      ...project,
+      projectImage: project.projectImage
+        ? (await ctx.storage.getUrl(project.projectImage)) ?? ""
+        : "",
+    };
+  },
+});
+
 export const create = authorizedWorkspaceMutation({
   args: {
     projectName: v.string(),
@@ -57,5 +74,36 @@ export const create = authorizedWorkspaceMutation({
       projectName: args.projectName,
       projectImage: args.projectImage,
     });
+  },
+});
+
+export const update = authorizedWorkspaceMutation({
+  args: {
+    projectId: v.id("projects"),
+    projectName: v.optional(v.string()),
+    projectImage: v.optional(v.id("_storage")),
+  },
+  async handler(ctx, args) {
+    // grab the project and confirm it exists
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new ConvexError("project does not exist");
+
+    await ctx.db.patch(project._id, {
+      projectName: args.projectImage,
+      projectImage: args.projectImage,
+    });
+    return project;
+  },
+});
+
+export const remove = authorizedWorkspaceMutation({
+  args: { projectId: v.id("projects") },
+  async handler(ctx, args) {
+    // TODO: Delete all project tasks
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new ConvexError("Project does not exist");
+
+    await ctx.db.delete(args.projectId);
   },
 });
