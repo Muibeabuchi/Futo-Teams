@@ -25,6 +25,21 @@ const schema = defineSchema({
   })
     .index("by_workspaceId", ["workspaceId"])
     .index("by_projectName", ["projectName"]),
+  tasks: defineTable({
+    workspaceId: v.id("workspaces"),
+    projectId: v.id("projects"),
+    taskName: v.string(),
+    asigneeId: v.id("users"),
+    description: v.optional(v.string()),
+    dueDate: v.number(),
+    status: v.union(
+      v.literal("BACKLOG"),
+      v.literal("TODO"),
+      v.literal("IN_PROGRESS"),
+      v.literal("DONE")
+    ),
+    position: v.number(),
+  }),
   // Your other tables...
 });
 
