@@ -36,7 +36,8 @@ const schema = defineSchema({
       v.literal("BACKLOG"),
       v.literal("TODO"),
       v.literal("IN_PROGRESS"),
-      v.literal("DONE")
+      v.literal("DONE"),
+      v.literal("IN_REVIEW")
     ),
     position: v.number(),
   }),
