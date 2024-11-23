@@ -3,7 +3,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { Infer, v } from "convex/values";
 
-const taskStatusValidator = v.union(
+export const taskStatusValidator = v.union(
   v.literal("BACKLOG"),
   v.literal("TODO"),
   v.literal("IN_PROGRESS"),
@@ -44,7 +44,7 @@ const schema = defineSchema({
     status: taskStatusValidator,
     position: v.number(),
     // min position = 1000,max position = 1000000
-  }),
+  }).index("by_workspaceId_by_status", ["workspaceId", "status"]),
   // Your other tables...
 });
 
