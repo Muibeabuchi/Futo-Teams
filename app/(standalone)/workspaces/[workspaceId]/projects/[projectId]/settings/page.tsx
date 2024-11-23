@@ -48,7 +48,7 @@ const ProjectIdSettingsPage = async ({
           projectImage: project.projectImage,
         }}
       />
-      Project Settings page : {project.projectName}
+      {/* Project Settings page : {project.projectName} */}
     </div>
   );
 };
