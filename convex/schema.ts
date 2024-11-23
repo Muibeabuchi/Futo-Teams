@@ -1,6 +1,15 @@
+// import { Doc } from "@/convex/_generated/dataModel";
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
-import { v } from "convex/values";
+import { Infer, v } from "convex/values";
+
+const taskStatusValidator = v.union(
+  v.literal("BACKLOG"),
+  v.literal("TODO"),
+  v.literal("IN_PROGRESS"),
+  v.literal("DONE"),
+  v.literal("IN_REVIEW")
+);
 
 const schema = defineSchema({
   ...authTables,
@@ -29,19 +38,16 @@ const schema = defineSchema({
     workspaceId: v.id("workspaces"),
     projectId: v.id("projects"),
     taskName: v.string(),
-    asigneeId: v.id("users"),
+    assigneeId: v.id("users"),
     description: v.optional(v.string()),
-    dueDate: v.number(),
-    status: v.union(
-      v.literal("BACKLOG"),
-      v.literal("TODO"),
-      v.literal("IN_PROGRESS"),
-      v.literal("DONE"),
-      v.literal("IN_REVIEW")
-    ),
+    dueDate: v.string(),
+    status: taskStatusValidator,
     position: v.number(),
+    // min position = 1000,max position = 1000000
   }),
   // Your other tables...
 });
+
+export type taskStatus = Infer<typeof taskStatusValidator>;
 
 export default schema;
